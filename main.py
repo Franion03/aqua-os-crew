@@ -12,9 +12,11 @@ import os
 import sys
 from datetime import datetime, timezone
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+from auth import require_admin
 
 # ── LLM Provider Detection ──────────────────────────────────────────
 _openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
@@ -106,7 +108,7 @@ class CrewRunRequest(BaseModel):
     params: dict = {}
 
 @app.post("/crew/run")
-def run_crew(req: CrewRunRequest):
+def run_crew(req: CrewRunRequest, _user: dict = Depends(require_admin)):
     if req.crew_type not in CREW_REGISTRY:
         raise HTTPException(status_code=400, detail=f"Unknown crew type '{req.crew_type}'. Options: {CREW_TYPES}")
     if _llm_provider == "none":

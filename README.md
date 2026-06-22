@@ -58,3 +58,14 @@ docker run -p 8001:8001 -e OPENROUTER_API_KEY=sk-... aqua-os-crew
 ## License
 
 GPL-3.0
+
+## Metrics
+
+Prometheus metrics are available via `metrics.py`. To enable, call in your FastAPI app:
+
+```python
+from metrics import setup_metrics
+setup_metrics(app)
+```
+
+Exposes auto-instrumented HTTP metrics at `/metrics`.
