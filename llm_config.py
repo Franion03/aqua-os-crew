@@ -55,10 +55,12 @@ def model_for(agent_role: str, prefer_free: bool = False) -> str:
 
     if provider == "openrouter":
         return model_map.get(agent_role, model_map["default"])
+    elif provider == "ollama":
+        # Use CREW_MODEL env var or default to llama3.2
+        return os.getenv("CREW_MODEL", "ollama/llama3.2:3b")
     elif provider == "gemini":
         return _GEMINI_MODEL
     else:
-        # No provider configured — CrewAI will fail with a clear error
         return _GEMINI_MODEL
 
 
@@ -69,6 +71,10 @@ def get_provider() -> str:
 
 def _detect_provider() -> str:
     if os.getenv("OPENROUTER_API_KEY"):
+        # If OPENAI_API_BASE points to Ollama, treat as local
+        api_base = os.getenv("OPENAI_API_BASE", "")
+        if "ollama" in api_base or "11434" in api_base:
+            return "ollama"
         return "openrouter"
     if os.getenv("GEMINI_API_KEY"):
         return "gemini"
